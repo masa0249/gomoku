@@ -3,8 +3,13 @@ import React, { useState } from "react";
 const BOARD_SIZE = 15; // 15x15の盤面
 
 function Square({ value, onSquareClick }) {
+  const getColor = (val) => {
+    if (val === "X") return "#add8e6"; 
+    if (val === "O") return "#f08080"; 
+    return "white"; 
+  };
   return (
-    <button className="square" onClick={onSquareClick} style={{ backgroundColor: value === "X" ? "lightblue" : "lightcoral" }}>
+    <button className="square" onClick={onSquareClick} style={{ backgroundColor: getColor(value) }}>
       {value}
     </button>
   );
@@ -34,12 +39,12 @@ function Board() {
   function handleUndo() {
     if (history.length > 1) {
       setHistory((prevHistory) => prevHistory.slice(0, prevHistory.length - 1));
-      setXIsNext((history.length - 1) % 2 === 0);
+      setXIsNext(!xIsNext);
     }
   }
 
   const winner = calculateWinner(currentSquares);
-  let status = winner ? `Winner: ${winner}` : `Next player: ${xIsNext ? "X" : "O"}`;
+  let status = winner ? `Winner: ${winner} !` : `Next player: ${xIsNext ? "X" : "O"}`;
 
   return (
     <div className="app-container">
