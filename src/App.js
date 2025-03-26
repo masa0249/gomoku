@@ -42,10 +42,12 @@ function Board() {
   let status = winner ? `Winner: ${winner}` : `Next player: ${xIsNext ? "X" : "O"}`;
 
   return (
-    <div>
+    <div className="app-container">
       <div className="status">{status}</div>
-      <button onClick={handleUndo}>Undo</button>
-      <button onClick={handleReset}>Reset</button>
+      <div className="controls">
+        <button onClick={handleUndo}>Undo</button>
+        <button onClick={handleReset}>Reset</button>
+      </div>
       <div className="board">
         {Array(BOARD_SIZE)
           .fill(null)
