@@ -1,0 +1,2 @@
+.board{display:grid;grid-template-columns:repeat(15,30px);grid-gap:2px}.board-row{display:contents}.square{width:30px;height:30px;font-size:18px;text-align:center;border:1px solid #999;cursor:pointer}.status{margin-bottom:10px;font-size:18px}
+/*# sourceMappingURL=main.ee9c8ead.chunk.css.map */
