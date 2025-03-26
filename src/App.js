@@ -4,7 +4,7 @@ const BOARD_SIZE = 15; // 15x15の盤面
 
 function Square({ value, onSquareClick }) {
   return (
-    <button className="square" onClick={onSquareClick}>
+    <button className="square" onClick={onSquareClick} style={{ backgroundColor: value === "X" ? "lightblue" : "lightcoral" }}>
       {value}
     </button>
   );
