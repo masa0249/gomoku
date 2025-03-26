@@ -27,6 +27,11 @@ function Board() {
     setXIsNext(!xIsNext);
   }
 
+  function handleReset() {
+    setHistory([Array(BOARD_SIZE * BOARD_SIZE).fill(null)]);
+    setXIsNext(true);
+  }
+
   function handleUndo() {
     if (history.length > 1) {
       setHistory(history.slice(0, history.length - 1));
@@ -41,6 +46,7 @@ function Board() {
     <div>
       <div className="status">{status}</div>
       <button onClick={handleUndo}>Undo</button>
+      <button onClick={handleReset}>Reset</button>
       <div className="board">
         {Array(BOARD_SIZE)
           .fill(null)
