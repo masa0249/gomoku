@@ -50,8 +50,8 @@ function Board() {
     <div className="app-container">
       <div className="status">{status}</div>
       <div className="controls">
-        <button onClick={handleUndo}>Undo</button>
-        <button onClick={handleReset}>Reset</button>
+        <button className="control-button" onClick={handleUndo}>Undo</button>
+        <button className="control-button" onClick={handleReset}>Reset</button>
       </div>
       <div className="board">
         {Array(BOARD_SIZE)
