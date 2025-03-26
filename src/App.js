@@ -1,5 +1,4 @@
-import React from 'react';
-import { useState } from "react";
+import React, { useState } from "react";
 
 const BOARD_SIZE = 15; // 15x15の盤面
 
@@ -23,7 +22,7 @@ function Board() {
     const nextSquares = currentSquares.slice();
     nextSquares[i] = xIsNext ? "X" : "O";
 
-    setHistory([...history, nextSquares]);
+    setHistory((prevHistory) => [...prevHistory, nextSquares]);
     setXIsNext(!xIsNext);
   }
 
@@ -34,8 +33,8 @@ function Board() {
 
   function handleUndo() {
     if (history.length > 1) {
-      setHistory(history.slice(0, history.length - 1));
-      setXIsNext(!xIsNext);
+      setHistory((prevHistory) => prevHistory.slice(0, prevHistory.length - 1));
+      setXIsNext((history.length - 1) % 2 === 0);
     }
   }
 
@@ -68,7 +67,6 @@ function Board() {
 }
 
 function calculateWinner(squares) {
-  const lines = [];
   const directions = [
     [1, 0], // 横
     [0, 1], // 縦
