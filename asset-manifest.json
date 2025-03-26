@@ -1,17 +1,17 @@
 {
   "files": {
-    "main.css": "/masa0249/gomoku.git/static/css/main.ee9c8ead.chunk.css",
-    "main.js": "/masa0249/gomoku.git/static/js/main.82509b12.chunk.js",
-    "main.js.map": "/masa0249/gomoku.git/static/js/main.82509b12.chunk.js.map",
-    "runtime~main.js": "/masa0249/gomoku.git/static/js/runtime~main.93b75463.js",
-    "runtime~main.js.map": "/masa0249/gomoku.git/static/js/runtime~main.93b75463.js.map",
-    "static/js/2.ae026ab9.chunk.js": "/masa0249/gomoku.git/static/js/2.ae026ab9.chunk.js",
-    "static/js/2.ae026ab9.chunk.js.map": "/masa0249/gomoku.git/static/js/2.ae026ab9.chunk.js.map",
-    "static/js/3.940f5f6f.chunk.js": "/masa0249/gomoku.git/static/js/3.940f5f6f.chunk.js",
-    "static/js/3.940f5f6f.chunk.js.map": "/masa0249/gomoku.git/static/js/3.940f5f6f.chunk.js.map",
-    "index.html": "/masa0249/gomoku.git/index.html",
-    "precache-manifest.6099926ab9a0b7196143dde2b1aad3be.js": "/masa0249/gomoku.git/precache-manifest.6099926ab9a0b7196143dde2b1aad3be.js",
-    "service-worker.js": "/masa0249/gomoku.git/service-worker.js",
-    "static/css/main.ee9c8ead.chunk.css.map": "/masa0249/gomoku.git/static/css/main.ee9c8ead.chunk.css.map"
+    "main.css": "/gomoku/static/css/main.ee9c8ead.chunk.css",
+    "main.js": "/gomoku/static/js/main.82509b12.chunk.js",
+    "main.js.map": "/gomoku/static/js/main.82509b12.chunk.js.map",
+    "runtime~main.js": "/gomoku/static/js/runtime~main.96af7f7e.js",
+    "runtime~main.js.map": "/gomoku/static/js/runtime~main.96af7f7e.js.map",
+    "static/js/2.ae026ab9.chunk.js": "/gomoku/static/js/2.ae026ab9.chunk.js",
+    "static/js/2.ae026ab9.chunk.js.map": "/gomoku/static/js/2.ae026ab9.chunk.js.map",
+    "static/js/3.940f5f6f.chunk.js": "/gomoku/static/js/3.940f5f6f.chunk.js",
+    "static/js/3.940f5f6f.chunk.js.map": "/gomoku/static/js/3.940f5f6f.chunk.js.map",
+    "index.html": "/gomoku/index.html",
+    "precache-manifest.ecb303e37f11e5b34e7c9ce452d43220.js": "/gomoku/precache-manifest.ecb303e37f11e5b34e7c9ce452d43220.js",
+    "service-worker.js": "/gomoku/service-worker.js",
+    "static/css/main.ee9c8ead.chunk.css.map": "/gomoku/static/css/main.ee9c8ead.chunk.css.map"
   }
 }
