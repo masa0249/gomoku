@@ -8,34 +8,21 @@
 
 .board {
   display: grid;
-  gap: 2px;
-  background-color: #000;
-  padding: 10px;
-  border-radius: 8px;
+  grid-template-columns: repeat(15, 30px);
+  grid-gap: 2px;
 }
-
 .board-row {
-  display: flex;
+  display: contents;
 }
-
 .square {
   width: 30px;
   height: 30px;
-  font-size: 20px;
-  font-weight: bold;
+  font-size: 18px;
   text-align: center;
-  background-color: white;
-  border: 1px solid black;
-  transition: background-color 0.3s;
-}
-
-.controls {
-  margin-top: 20px;
-}
-
-button {
-  margin: 5px;
-  padding: 10px 15px;
-  font-size: 16px;
+  border: 1px solid #999;
   cursor: pointer;
+}
+.status {
+  margin-bottom: 10px;
+  font-size: 18px;
 }
