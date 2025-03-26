@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState } from "react";
 
 const BOARD_SIZE = 15; // 15x15の盤面
