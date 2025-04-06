@@ -1,2 +1,0 @@
-.app-container{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh}.board{display:grid;grid-template-columns:repeat(15,30px)}.board-row{display:contents}.square{width:30px;height:30px;font-size:18px;text-align:center;border:1px solid #999;cursor:pointer}.status{margin-bottom:10px;font-size:18px}
-/*# sourceMappingURL=main.63821981.chunk.css.map */
