@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 
 const BOARD_SIZE = 15; 
 
@@ -20,16 +20,17 @@ function Board() {
   const [history, setHistory] = useState([Array(BOARD_SIZE * BOARD_SIZE).fill(null)]);
   const currentSquares = history[history.length - 1];
 
-  function handleClick(i) {
-    if (calculateWinner(currentSquares) || currentSquares[i]) {
-      return;
-    }
-    const nextSquares = currentSquares.slice();
-    nextSquares[i] = xIsNext ? "X" : "O";
-
-    setHistory((prevHistory) => [...prevHistory, nextSquares]);
-    setXIsNext(!xIsNext);
-  }
+  const handleClick = useCallback((i) => {
+    setHistory((prevHistory) => {
+      const current = prevHistory[prevHistory.length - 1];
+      if (calculateWinner(current) || current[i]) return prevHistory;
+  
+      const nextSquares = current.slice();
+      nextSquares[i] = xIsNext ? "X" : "O";
+      setXIsNext(!xIsNext);
+      return [...prevHistory, nextSquares];
+    });
+  }, [xIsNext]);
 
   function handleReset() {
     setHistory([Array(BOARD_SIZE * BOARD_SIZE).fill(null)]);
@@ -42,9 +43,20 @@ function Board() {
       setXIsNext(!xIsNext);
     }
   }
+  
 
   const winner = calculateWinner(currentSquares);
   let status = winner ? `Winner: ${winner} !` : `Next player: ${xIsNext ? "X" : "O"}`;
+
+  useEffect(() => {
+    if (!xIsNext && !winner) {
+      const timeout = setTimeout(() => {
+        const aiMove = findBestMove(currentSquares, "O");
+        if (aiMove !== null) handleClick(aiMove);
+      }, 500);
+      return () => clearTimeout(timeout);
+    }
+  }, [xIsNext, winner, currentSquares, handleClick]);
 
   return (
     <div className="app-container">
@@ -104,4 +116,50 @@ function calculateWinner(squares) {
 
 export default function App() {
   return <Board />;
+}
+
+// 簡易MCTS: ランダムに100回シミュレーションして最も勝率の高い手を選ぶ
+function findBestMove(squares, player) {
+    const availableMoves = squares
+        .map((val, idx) => (val === null ? idx : null))
+        .filter((idx) => idx !== null);
+
+    if (availableMoves.length === 0) return null;
+
+    const simulations = 100;
+    let bestMove = null;
+    let bestWinCount = -1;
+
+    for (let move of availableMoves) {
+        let winCount = 0;
+        for (let i = 0; i < simulations; i++) {
+        const result = simulateGame(squares.slice(), move, player);
+        if (result === player) winCount++;
+        }
+        if (winCount > bestWinCount) {
+        bestWinCount = winCount;
+        bestMove = move;
+        }
+    }
+
+    return bestMove;
+}
+  
+function simulateGame(squares, firstMove, player) {
+    const opponent = player === "X" ? "O" : "X";
+    squares[firstMove] = player;
+    let currentPlayer = opponent;
+
+    while (true) {
+        const winner = calculateWinner(squares);
+        if (winner) return winner;
+        const available = squares
+        .map((v, i) => (v === null ? i : null))
+        .filter((i) => i !== null);
+        if (available.length === 0) return null;
+        const randomMove =
+        available[Math.floor(Math.random() * available.length)];
+        squares[randomMove] = currentPlayer;
+        currentPlayer = currentPlayer === "X" ? "O" : "X";
+    }
 }
