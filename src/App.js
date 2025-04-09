@@ -1,15 +1,15 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Home from "./components/Home";
-import OneGameBoard from "./components/OneGameBoard";
-import TwoGameBoard from "./components/TwoGameBoard";
+import CpuBoard from "./components/CpuBoard";
+import GameBoard from "./components/GameBoard";
 
 const App = () => {
   return (
     <Routes>
       <Route path="/" element={<Home />} />
-      <Route path="/onegame" element={<OneGameBoard />} />
-      <Route path="/twogame" element={<TwoGameBoard />} />
+      <Route path="/cpu" element={<CpuBoard />} />
+      <Route path="/game" element={<GameBoard />} />
     </Routes>
   );
 };

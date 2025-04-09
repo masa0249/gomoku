@@ -8,8 +8,8 @@ const Home = () => {
     <div className="home-container">
       <h1>五目並べ</h1>
       <p>モードを選択してください</p>
-      <button onClick={() => navigate("/onegame")}>一人用（CPU 戦）</button>
-      <button onClick={() => navigate("/twogame")}>二人用（対人戦）</button>
+      <button onClick={() => navigate("/cpu")}>一人用（CPU戦）</button>
+      <button onClick={() => navigate("/game")}>二人用（対人戦）</button>
     </div>
   );
 };
