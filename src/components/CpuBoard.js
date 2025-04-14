@@ -43,7 +43,6 @@ function Board() {
       setXIsNext(!xIsNext);
     }
   }
-  
 
   const winner = calculateWinner(currentSquares);
   let status = winner ? `Winner: ${winner} !` : `Next player: ${xIsNext ? "X" : "O"}`;
@@ -118,30 +117,29 @@ export default function App() {
   return <Board />;
 }
 
-// 簡易MCTS: ランダムに100回シミュレーションして最も勝率の高い手を選ぶ
 function findBestMove(squares, player) {
   const opponent = player === "X" ? "O" : "X";
 
-  // 1. 自分が勝てる手を探す
   const winMove = findThreatMove(squares, player, 4);
   if (winMove !== null) return winMove;
-  const win3 = findThreatMove(squares, player, 3);
-  if (win3 !== null) return win3;
 
-  // 2. 相手が勝ちそうなら防ぐ
   const blockMove = findThreatMove(squares, opponent, 4);
   if (blockMove !== null) return blockMove;
+
+  const win3 = findThreatMove(squares, player, 3);
+  if (win3 !== null) return win3;
+  
   const block3 = findThreatMove(squares, opponent, 3);
   if (block3 !== null) return block3;
 
-  // 3. シミュレーション（簡易MCTS）で選択
+
   const availableMoves = squares
     .map((val, idx) => (val === null ? idx : null))
     .filter((idx) => idx !== null);
 
   if (availableMoves.length === 0) return null;
 
-  const simulations = 50; // 重すぎるなら数を調整
+  const simulations = 50; 
   let bestMove = null;
   let bestWinCount = -1;
 
@@ -183,24 +181,24 @@ function simulateGame(squares, firstMove, player) {
 
 function findThreatMove(squares, targetPlayer, count) {
   const directions = [
-    [1, 0], // 横
-    [0, 1], // 縦
-    [1, 1], // 斜め
-    [1, -1] // 逆斜め
+    [1, 0], 
+    [0, 1], 
+    [1, 1], 
+    [1, -1] 
   ];
 
   for (let r = 0; r < BOARD_SIZE; r++) {
     for (let c = 0; c < BOARD_SIZE; c++) {
       for (const [dr, dc] of directions) {
         let line = [];
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < count + 1; i++) {
           const nr = r + dr * i;
           const nc = c + dc * i;
           if (nr < 0 || nr >= BOARD_SIZE || nc < 0 || nc >= BOARD_SIZE) break;
           line.push(nr * BOARD_SIZE + nc);
         }
 
-        if (line.length !== 5) continue;
+        if (line.length !== count + 1) continue;
 
         const values = line.map((i) => squares[i]);
         const countTarget = values.filter((v) => v === targetPlayer).length;
@@ -213,7 +211,6 @@ function findThreatMove(squares, targetPlayer, count) {
       }
     }
   }
-
   return null;
 }
 
