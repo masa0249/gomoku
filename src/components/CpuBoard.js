@@ -18,31 +18,42 @@ function Square({ value, onSquareClick }) {
 function Board() {
   const [xIsNext, setXIsNext] = useState(true);
   const [history, setHistory] = useState([Array(BOARD_SIZE * BOARD_SIZE).fill(null)]);
+  const [userMoves, setUserMoves] = useState([]);
+  const [aiMoves, setAiMoves] = useState([]);
   const currentSquares = history[history.length - 1];
 
   const handleClick = useCallback((i) => {
-    setHistory((prevHistory) => {
-      const current = prevHistory[prevHistory.length - 1];
-      if (calculateWinner(current) || current[i]) return prevHistory;
+    const current = history[history.length - 1];
+    if (calculateWinner(current) || current[i]) return;
   
-      const nextSquares = current.slice();
-      nextSquares[i] = xIsNext ? "X" : "O";
-      setXIsNext(!xIsNext);
-      return [...prevHistory, nextSquares];
-    });
-  }, [xIsNext]);
+    const nextSquares = current.slice();
+    nextSquares[i] = xIsNext ? "X" : "O";
+  
+    setHistory([...history, nextSquares]);
+    setXIsNext(!xIsNext);
+    if (xIsNext) {
+      setUserMoves([...userMoves, i]);
+    } else {
+      setAiMoves([...aiMoves, i]);
+    }
+  }, [history, xIsNext, userMoves, aiMoves]);
 
   function handleReset() {
     setHistory([Array(BOARD_SIZE * BOARD_SIZE).fill(null)]);
     setXIsNext(true);
+    setUserMoves([]);
+    setAiMoves([]);
   }
 
   function handleUndo() {
-    if (history.length > 1) {
-      setHistory((prevHistory) => prevHistory.slice(0, prevHistory.length - 1));
-      setXIsNext(!xIsNext);
+    if (history.length > 2) {
+      setHistory(prev => prev.slice(0, prev.length - 2));
+      setUserMoves(prev => prev.slice(0, -1));
+      setAiMoves(prev => prev.slice(0, -1));
+      setXIsNext(true); 
     }
   }
+  
 
   const winner = calculateWinner(currentSquares);
   let status = winner ? `Winner: ${winner} !` : `Next player: ${xIsNext ? "X" : "O"}`;
@@ -50,12 +61,12 @@ function Board() {
   useEffect(() => {
     if (!xIsNext && !winner) {
       const timeout = setTimeout(() => {
-        const aiMove = findBestMove(currentSquares, "O");
+        const aiMove = findBestMove(currentSquares, "O", userMoves, aiMoves);
         if (aiMove !== null) handleClick(aiMove);
       }, 500);
       return () => clearTimeout(timeout);
     }
-  }, [xIsNext, winner, currentSquares, handleClick]);
+  }, [xIsNext, winner, currentSquares, handleClick, userMoves, aiMoves]);
 
   return (
     <div className="app-container">
@@ -117,7 +128,7 @@ export default function App() {
   return <Board />;
 }
 
-function findBestMove(squares, player) {
+function findBestMove(squares, player, userMoves, aiMoves) {
   const opponent = player === "X" ? "O" : "X";
 
   const winMove = findThreatMove(squares, player, 4);
@@ -133,24 +144,23 @@ function findBestMove(squares, player) {
   if (block3 !== null) return block3;
 
 
-  const availableMoves = squares
-    .map((val, idx) => (val === null ? idx : null))
-    .filter((idx) => idx !== null);
+  const availableMoves = getCandidateMoves(squares, aiMoves, userMoves[userMoves.length - 1]);
 
   if (availableMoves.length === 0) return null;
 
-  const simulations = 50; 
+  const simulations = 100; 
+  const maxSteps = 5;
   let bestMove = null;
-  let bestWinCount = -1;
+  let bestScore = -Infinity;
 
   for (let move of availableMoves) {
-    let winCount = 0;
+    let totalScore = 0;
     for (let i = 0; i < simulations; i++) {
-      const result = simulateGame(squares.slice(), move, player);
-      if (result === player) winCount++;
+      const score = simulateGameLimitedSteps(squares.slice(), move, player, maxSteps, userMoves.slice(), aiMoves.slice());
+      totalScore += score;
     }
-    if (winCount > bestWinCount) {
-      bestWinCount = winCount;
+    if (totalScore > bestScore) {
+      bestScore = totalScore;
       bestMove = move;
     }
   }
@@ -158,25 +168,98 @@ function findBestMove(squares, player) {
   return bestMove;
 }
 
+function simulateGameLimitedSteps(squares, firstMove, player, maxSteps, userMoves, aiMoves) {
+  const opponent = player === "X" ? "O" : "X";
+  squares[firstMove] = player;
+  aiMoves.push(firstMove);
 
-  
-function simulateGame(squares, firstMove, player) {
-    const opponent = player === "X" ? "O" : "X";
-    squares[firstMove] = player;
-    let currentPlayer = opponent;
+  let currentPlayer = opponent;
+  let steps = 1;
 
-    while (true) {
-        const winner = calculateWinner(squares);
-        if (winner) return winner;
-        const available = squares
-        .map((v, i) => (v === null ? i : null))
-        .filter((i) => i !== null);
-        if (available.length === 0) return null;
-        const randomMove =
-        available[Math.floor(Math.random() * available.length)];
-        squares[randomMove] = currentPlayer;
-        currentPlayer = currentPlayer === "X" ? "O" : "X";
+  let opponentLastMove = firstMove;
+
+  while (steps < maxSteps) {
+
+    let candidates;
+    let move;
+
+    if (currentPlayer === player) {
+      candidates = getCandidateMoves(squares, aiMoves, opponentLastMove);
+      if (candidates.length === 0) break;
+      move = candidates[Math.floor(Math.random() * candidates.length)];
+      squares[move] = currentPlayer;
+      aiMoves.push(move);
+    } else {
+      candidates = getCandidateMoves(squares, userMoves, opponentLastMove);
+      if (candidates.length === 0) break;
+      move = candidates[Math.floor(Math.random() * candidates.length)];
+      squares[move] = currentPlayer;  
+      userMoves.push(move);
     }
+    
+    opponentLastMove = move;
+    currentPlayer = currentPlayer === "X" ? "O" : "X";
+    steps++;
+  }
+
+  const winner = calculateWinner(squares);
+  let score = 0;
+  if (winner === player) return 100;
+  else if (winner === opponent) return -100;
+  else {
+    if (findThreatMove(squares, player, 4) !== null) {
+      score += 50;
+    } 
+    if (findThreatMove(squares, opponent, 4) !== null) {
+      score -= 50;
+    }
+    if (findThreatMove(squares, player, 3) !== null) {
+      score += 30;
+    }
+    if (findThreatMove(squares, opponent, 3) !== null) {
+      score -= 30;
+    }
+  }
+  return score;
+}
+
+
+function getCandidateMoves(squares, myMoves, opponentLastMove) {
+  const candidateSet = new Set();
+  const directions = [-1, 0, 1];
+
+  const addNeighbors = (idx) => {
+    const row = Math.floor(idx / BOARD_SIZE);
+    const col = idx % BOARD_SIZE;
+
+    for (const dr of directions) {
+      for (const dc of directions) {
+        if (dr === 0 && dc === 0) continue;
+
+        const nr = row + dr;
+        const nc = col + dc;
+        const ni = nr * BOARD_SIZE + nc;
+
+        if (
+          nr >= 0 && nr < BOARD_SIZE &&
+          nc >= 0 && nc < BOARD_SIZE &&
+          squares[ni] === null
+        ) {
+          candidateSet.add(ni);
+        }
+      }
+    }
+  };
+
+  for (const move of myMoves) {
+    addNeighbors(move);
+  }
+
+  if (opponentLastMove !== null && opponentLastMove !== undefined) {
+    addNeighbors(opponentLastMove);
+  }
+
+  return Array.from(candidateSet);
 }
 
 function findThreatMove(squares, targetPlayer, count) {
