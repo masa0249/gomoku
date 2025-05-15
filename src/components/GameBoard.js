@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const BOARD_SIZE = 15; 
 
@@ -34,6 +34,7 @@ function Board() {
   function handleReset() {
     setHistory([Array(BOARD_SIZE * BOARD_SIZE).fill(null)]);
     setXIsNext(true);
+    localStorage.removeItem("gomokuState");
   }
 
   function handleUndo() {
@@ -45,6 +46,26 @@ function Board() {
 
   const winner = calculateWinner(currentSquares);
   let status = winner ? `Winner: ${winner} !` : `Next player: ${xIsNext ? "X" : "O"}`;
+
+  useEffect(() => {
+    const saved = localStorage.getItem("gomokuState");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.history && parsed.xIsNext !== undefined) {
+          setHistory(parsed.history);
+          setXIsNext(parsed.xIsNext);
+        }
+      } catch (e) {
+        console.error("Failed to parse saved game state:", e);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const data = JSON.stringify({ history, xIsNext });
+    localStorage.setItem("gomokuState", data);
+  }, [history, xIsNext]);
 
   return (
     <div className="app-container">
