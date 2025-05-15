@@ -53,3 +53,14 @@
   transition: background-color 0.3s;
   text-align: center;
 }
+
+.difficulty-selector {
+  margin-bottom: 10px;
+}
+
+.difficulty-selector select {
+  font-size: 1.0rem;   
+  padding: 5px 10px;   
+  min-width: 120px;    
+  border-radius: 6px;  
+}

@@ -16,6 +16,7 @@ function Square({ value, onSquareClick }) {
 }
 
 function Board() {
+  const [difficulty, setDifficulty] = useState("normal");
   const [xIsNext, setXIsNext] = useState(true);
   const [history, setHistory] = useState([Array(BOARD_SIZE * BOARD_SIZE).fill(null)]);
   const [userMoves, setUserMoves] = useState([]);
@@ -56,20 +57,37 @@ function Board() {
   
 
   const winner = calculateWinner(currentSquares);
-  let status = winner ? `Winner: ${winner} !` : `Next player: ${xIsNext ? "X" : "O"}`;
+  let status;
+  if (winner) {
+    if (winner === "X") {
+      status = "You Win!";
+    } else if (winner === "O") {
+      status = "You Lose!";
+    }
+  } else {
+    status = `Next player: ${xIsNext ? "X" : "O"}`;
+  }
 
   useEffect(() => {
     if (!xIsNext && !winner) {
       const timeout = setTimeout(() => {
-        const aiMove = findBestMove(currentSquares, "O", userMoves, aiMoves);
+        const aiMove = findBestMove(currentSquares, "O", userMoves, aiMoves, difficulty);
         if (aiMove !== null) handleClick(aiMove);
       }, 500);
       return () => clearTimeout(timeout);
     }
-  }, [xIsNext, winner, currentSquares, handleClick, userMoves, aiMoves]);
+  }, [xIsNext, winner, currentSquares, handleClick, userMoves, aiMoves, difficulty]);
 
   return (
     <div className="app-container">
+      <div className="difficulty-selector">
+        <label>CPU難易度: </label>
+        <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)}>
+          <option value="easy">弱い</option>
+          <option value="normal">普通</option>
+          <option value="hard">強い</option>
+        </select>
+      </div>
       <div className="status">{status}</div>
       <div className="controls">
         <button className="control-button" onClick={handleUndo}>Undo</button>
@@ -128,30 +146,43 @@ export default function App() {
   return <Board />;
 }
 
-function findBestMove(squares, player, userMoves, aiMoves) {
+function findBestMove(squares, player, userMoves, aiMoves, difficulty = "normal") {
   const opponent = player === "X" ? "O" : "X";
 
+   
   const winMove = findThreatMove(squares, player, 4);
   if (winMove !== null) return winMove;
 
   const blockMove = findThreatMove(squares, opponent, 4);
   if (blockMove !== null) return blockMove;
 
-  const win3 = findThreatMove(squares, player, 3);
-  if (win3 !== null) return win3;
-  
-  const block3 = findThreatMove(squares, opponent, 3);
-  if (block3 !== null) return block3;
-
+  if (difficulty !== "easy") {
+    const win3 = findThreatMove(squares, player, 3);
+    if (win3 !== null) return win3;
+    
+    const block3 = findThreatMove(squares, opponent, 3);
+    if (block3 !== null) return block3;
+  }
 
   const availableMoves = getCandidateMoves(squares, aiMoves, userMoves[userMoves.length - 1]);
 
   if (availableMoves.length === 0) return null;
 
-  const simulations = 100; 
-  const maxSteps = 5;
   let bestMove = null;
   let bestScore = -Infinity;
+  let simulations = 0;
+  let maxSteps = 0;
+
+  if (difficulty === "easy") {
+    simulations = 10;
+    maxSteps = 1;
+  } else if (difficulty === "normal") {
+    simulations = 50;
+    maxSteps = 3;
+  } else if (difficulty === "hard") {
+    simulations = 500;
+    maxSteps = 5;
+  }
 
   for (let move of availableMoves) {
     let totalScore = 0;
@@ -274,22 +305,34 @@ function findThreatMove(squares, targetPlayer, count) {
     for (let c = 0; c < BOARD_SIZE; c++) {
       for (const [dr, dc] of directions) {
         let line = [];
-        for (let i = 0; i < count + 1; i++) {
+        for (let i = 0; i < 5; i++) {
           const nr = r + dr * i;
           const nc = c + dc * i;
           if (nr < 0 || nr >= BOARD_SIZE || nc < 0 || nc >= BOARD_SIZE) break;
           line.push(nr * BOARD_SIZE + nc);
         }
 
-        if (line.length !== count + 1) continue;
+        if (line.length !== 5) continue;
 
         const values = line.map((i) => squares[i]);
         const countTarget = values.filter((v) => v === targetPlayer).length;
         const countNull = values.filter((v) => v === null).length;
 
-        if (countTarget === count && countNull === 1) {
-          const idx = line.find((i) => squares[i] === null);
-          return idx;
+        if (countTarget === count && countNull === 5 - count) {
+          if (count === 4) {
+            const idx = line.find((i) => squares[i] === null);
+            return idx;
+          } else {
+            const nullLineIndexes = line.map((i, idx) => squares[i] === null ? idx : -1).filter(idx => idx !== -1);
+            if (nullLineIndexes.length === 2) {
+              const line1 = nullLineIndexes[0];
+              const line2 = nullLineIndexes[1];
+              if (Math.abs(line2 - line1) !== 1) {
+                return Math.abs(2 - line1) < Math.abs(2 - line2) ? line[line1] : line[line2];
+              }
+              
+            }
+          }
         }
       }
     }
