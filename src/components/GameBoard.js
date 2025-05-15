@@ -17,7 +17,21 @@ function Square({ value, onSquareClick }) {
 
 function Board() {
   const [xIsNext, setXIsNext] = useState(true);
-  const [history, setHistory] = useState([Array(BOARD_SIZE * BOARD_SIZE).fill(null)]);
+  const [history, setHistory] = useState(() => {
+    const saved = localStorage.getItem("gomokuState");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.history && parsed.xIsNext !== undefined) {
+          setXIsNext(parsed.xIsNext);
+          return parsed.history;
+        }
+      } catch (e) {
+        console.error("Failed to parse saved game state:", e);
+      }
+    }
+    return [Array(BOARD_SIZE * BOARD_SIZE).fill(null)];
+  });
   const currentSquares = history[history.length - 1];
 
   function handleClick(i) {
@@ -46,21 +60,6 @@ function Board() {
 
   const winner = calculateWinner(currentSquares);
   let status = winner ? `Winner: ${winner} !` : `Next player: ${xIsNext ? "X" : "O"}`;
-
-  useEffect(() => {
-    const saved = localStorage.getItem("gomokuState");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (parsed.history && parsed.xIsNext !== undefined) {
-          setHistory(parsed.history);
-          setXIsNext(parsed.xIsNext);
-        }
-      } catch (e) {
-        console.error("Failed to parse saved game state:", e);
-      }
-    }
-  }, []);
 
   useEffect(() => {
     const data = JSON.stringify({ history, xIsNext });
