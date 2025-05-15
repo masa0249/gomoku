@@ -44,6 +44,7 @@ function Board() {
     setXIsNext(true);
     setUserMoves([]);
     setAiMoves([]);
+    localStorage.removeItem("gomokuState");
   }
 
   function handleUndo() {
@@ -77,6 +78,33 @@ function Board() {
       return () => clearTimeout(timeout);
     }
   }, [xIsNext, winner, currentSquares, handleClick, userMoves, aiMoves, difficulty]);
+
+  useEffect(() => {
+    const savedState = localStorage.getItem("gomokuState");
+    if (savedState) {
+      try {
+        const { history, xIsNext, userMoves, aiMoves } = JSON.parse(savedState);
+        if (Array.isArray(history) && history.length > 0) {
+          setHistory(history);
+          setXIsNext(xIsNext);
+          setUserMoves(userMoves || []);
+          setAiMoves(aiMoves || []);
+        }
+      } catch (err) {
+        console.error("Failed to parse saved state:", err);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const state = {
+      history,
+      xIsNext,
+      userMoves,
+      aiMoves,
+    };
+    localStorage.setItem("gomokuState", JSON.stringify(state));
+  }, [history, xIsNext, userMoves, aiMoves]);
 
   return (
     <div className="app-container">
