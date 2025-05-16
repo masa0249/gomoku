@@ -61,7 +61,13 @@ function Board() {
   }
 
   const winner = calculateWinner(currentSquares);
-  let status = winner ? `Winner: ${winner} !` : `Next player: ${xIsNext ? "X" : "O"}`;
+  let status;
+  if (winner) {
+    status = <span style={{ color: "red" }}>Winner: {winner} !</span>;
+  } else {
+    status = <span>Next player: {xIsNext ? "X" : "O"}</span>;
+  }
+  const statusClass = winner ? "status status-large" : "status";
 
   useEffect(() => {
     const data = JSON.stringify({ history, xIsNext });
@@ -70,7 +76,7 @@ function Board() {
 
   return (
     <div className="app-container">
-      <div className="status">{status}</div>
+      <div className={statusClass}>{status}</div>
       <div className="controls">
         <button className="control-button" onClick={handleUndo}>Undo</button>
         <button className="control-button" onClick={handleReset}>Reset</button>

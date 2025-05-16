@@ -112,13 +112,14 @@ function Board() {
   let status;
   if (winner) {
     if (winner === "X") {
-      status = "You Win!";
+      status = <span style={{ color: "red" }}>You Win!</span>;
     } else if (winner === "O") {
-      status = "You Lose!";
+      status = <span style={{ color: "blue" }}>You Lose</span>;
     }
   } else {
-    status = `Next player: ${xIsNext ? "X" : "O"}`;
+    status = <span>Next player: {xIsNext ? "X" : "O"}</span>;
   }
+  const statusClass = winner ? "status status-large" : "status";
 
   useEffect(() => {
     if (!xIsNext && !winner) {
@@ -150,7 +151,7 @@ function Board() {
           <option value="hard">強い</option>
         </select>
       </div>
-      <div className="status">{status}</div>
+      <div className={statusClass}>{status}</div>
       <div className="controls">
         <button className="control-button" onClick={handleUndo}>Undo</button>
         <button className="control-button" onClick={handleReset}>Reset</button>
@@ -240,7 +241,7 @@ function findBestMove(squares, player, userMoves, aiMoves, difficulty = "normal"
     simulations = 50;
     maxSteps = 3;
   } else if (difficulty === "hard") {
-    simulations = 500;
+    simulations = 200;
     maxSteps = 5;
   }
 
