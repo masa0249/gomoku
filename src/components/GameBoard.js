@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const BOARD_SIZE = 15; 
 
@@ -16,9 +17,10 @@ function Square({ value, onSquareClick }) {
 }
 
 function Board() {
+  const navigate = useNavigate();
   const [xIsNext, setXIsNext] = useState(true);
   const [history, setHistory] = useState(() => {
-    const saved = localStorage.getItem("gomokuState");
+    const saved = localStorage.getItem("gomokuStateMulti");
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -48,7 +50,7 @@ function Board() {
   function handleReset() {
     setHistory([Array(BOARD_SIZE * BOARD_SIZE).fill(null)]);
     setXIsNext(true);
-    localStorage.removeItem("gomokuState");
+    localStorage.removeItem("gomokuStateMulti");
   }
 
   function handleUndo() {
@@ -63,7 +65,7 @@ function Board() {
 
   useEffect(() => {
     const data = JSON.stringify({ history, xIsNext });
-    localStorage.setItem("gomokuState", data);
+    localStorage.setItem("gomokuStateMulti", data);
   }, [history, xIsNext]);
 
   return (
@@ -72,6 +74,7 @@ function Board() {
       <div className="controls">
         <button className="control-button" onClick={handleUndo}>Undo</button>
         <button className="control-button" onClick={handleReset}>Reset</button>
+        <button className="control-button" onClick={() => navigate("/")}>TOP</button>
       </div>
       <div className="board">
         {Array(BOARD_SIZE)

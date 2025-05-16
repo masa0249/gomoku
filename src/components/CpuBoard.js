@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 
 const BOARD_SIZE = 15; 
 
@@ -16,11 +17,55 @@ function Square({ value, onSquareClick }) {
 }
 
 function Board() {
+  const navigate = useNavigate();
   const [difficulty, setDifficulty] = useState("normal");
-  const [xIsNext, setXIsNext] = useState(true);
-  const [history, setHistory] = useState([Array(BOARD_SIZE * BOARD_SIZE).fill(null)]);
-  const [userMoves, setUserMoves] = useState([]);
-  const [aiMoves, setAiMoves] = useState([]);
+  const [history, setHistory] = useState(() => {
+    const savedState = localStorage.getItem("gomokuStateSingle");
+    if (savedState) {
+      try {
+        const parsed = JSON.parse(savedState);
+        if (Array.isArray(parsed.history) && parsed.history.length > 0) {
+          return parsed.history;
+        }
+      } catch (err) {
+        console.error("Failed to parse saved history:", err);
+      }
+    }
+    return [Array(BOARD_SIZE * BOARD_SIZE).fill(null)];
+  });
+  
+  const [xIsNext, setXIsNext] = useState(() => {
+    const savedState = localStorage.getItem("gomokuStateSingle");
+    if (savedState) {
+      try {
+        const parsed = JSON.parse(savedState);
+        return parsed.xIsNext ?? true;
+      } catch (err) {}
+    }
+    return true;
+  });
+  
+  const [userMoves, setUserMoves] = useState(() => {
+    const savedState = localStorage.getItem("gomokuStateSingle");
+    if (savedState) {
+      try {
+        const parsed = JSON.parse(savedState);
+        return parsed.userMoves || [];
+      } catch (err) {}
+    }
+    return [];
+  });
+  
+  const [aiMoves, setAiMoves] = useState(() => {
+    const savedState = localStorage.getItem("gomokuStateSingle");
+    if (savedState) {
+      try {
+        const parsed = JSON.parse(savedState);
+        return parsed.aiMoves || [];
+      } catch (err) {}
+    }
+    return [];
+  });
   const currentSquares = history[history.length - 1];
 
   const handleClick = useCallback((i) => {
@@ -44,7 +89,7 @@ function Board() {
     setXIsNext(true);
     setUserMoves([]);
     setAiMoves([]);
-    localStorage.removeItem("gomokuState");
+    localStorage.removeItem("gomokuStateSingle");
   }
 
   function handleUndo() {
@@ -53,9 +98,15 @@ function Board() {
       setUserMoves(prev => prev.slice(0, -1));
       setAiMoves(prev => prev.slice(0, -1));
       setXIsNext(true); 
+      const state = {
+        history: history,
+        xIsNext: xIsNext,
+        userMoves: userMoves,
+        aiMoves: aiMoves,
+      };
+      localStorage.setItem("gomokuStateSingle", JSON.stringify(state));
     }
   }
-  
 
   const winner = calculateWinner(currentSquares);
   let status;
@@ -80,30 +131,13 @@ function Board() {
   }, [xIsNext, winner, currentSquares, handleClick, userMoves, aiMoves, difficulty]);
 
   useEffect(() => {
-    const savedState = localStorage.getItem("gomokuState");
-    if (savedState) {
-      try {
-        const { history, xIsNext, userMoves, aiMoves } = JSON.parse(savedState);
-        if (Array.isArray(history) && history.length > 0) {
-          setHistory(history);
-          setXIsNext(xIsNext);
-          setUserMoves(userMoves || []);
-          setAiMoves(aiMoves || []);
-        }
-      } catch (err) {
-        console.error("Failed to parse saved state:", err);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
     const state = {
       history,
       xIsNext,
       userMoves,
       aiMoves,
     };
-    localStorage.setItem("gomokuState", JSON.stringify(state));
+    localStorage.setItem("gomokuStateSingle", JSON.stringify(state));
   }, [history, xIsNext, userMoves, aiMoves]);
 
   return (
@@ -120,6 +154,7 @@ function Board() {
       <div className="controls">
         <button className="control-button" onClick={handleUndo}>Undo</button>
         <button className="control-button" onClick={handleReset}>Reset</button>
+        <button className="control-button" onClick={() => navigate("/")}>TOP</button>
       </div>
       <div className="board">
         {Array(BOARD_SIZE)
@@ -140,6 +175,7 @@ function Board() {
     </div>
   );
 }
+
 
 function calculateWinner(squares) {
   const directions = [
@@ -174,26 +210,22 @@ export default function App() {
   return <Board />;
 }
 
+
 function findBestMove(squares, player, userMoves, aiMoves, difficulty = "normal") {
   const opponent = player === "X" ? "O" : "X";
 
-   
   const winMove = findThreatMove(squares, player, 4);
   if (winMove !== null) return winMove;
-
   const blockMove = findThreatMove(squares, opponent, 4);
   if (blockMove !== null) return blockMove;
-
   if (difficulty !== "easy") {
     const win3 = findThreatMove(squares, player, 3);
     if (win3 !== null) return win3;
-    
     const block3 = findThreatMove(squares, opponent, 3);
     if (block3 !== null) return block3;
   }
 
   const availableMoves = getCandidateMoves(squares, aiMoves, userMoves[userMoves.length - 1]);
-
   if (availableMoves.length === 0) return null;
 
   let bestMove = null;
@@ -223,9 +255,9 @@ function findBestMove(squares, player, userMoves, aiMoves, difficulty = "normal"
       bestMove = move;
     }
   }
-
   return bestMove;
 }
+
 
 function simulateGameLimitedSteps(squares, firstMove, player, maxSteps, userMoves, aiMoves) {
   const opponent = player === "X" ? "O" : "X";
@@ -321,6 +353,7 @@ function getCandidateMoves(squares, myMoves, opponentLastMove) {
   return Array.from(candidateSet);
 }
 
+
 function findThreatMove(squares, targetPlayer, count) {
   const directions = [
     [1, 0], 
@@ -367,5 +400,3 @@ function findThreatMove(squares, targetPlayer, count) {
   }
   return null;
 }
-
-
